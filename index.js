@@ -8,7 +8,7 @@ app.use(express.json());
 const transporter = nodemailer.createTransport({
   host: 'smtp.012.net.il',
   port: 465,
-  secure: true, // ? חובה ל־SSL
+  secure: true, // SSL
   auth: {
     user: 'Report@sbparking.co.il',
     pass: 'o51W38D5',
@@ -25,12 +25,13 @@ app.post('/send-summary-email', async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const mailText = `
-לקוח: ${clientName}
-טלפון: ${phone || 'לא סופק'}
-
-סיכום שיחה:
-${summary}
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
+      <strong>לקוח:</strong> ${clientName}<br/>
+      <strong>טלפון:</strong> ${phone || 'לא סופק'}<br/><br/>
+      <strong>סיכום שיחה:</strong><br/>
+      <pre style="white-space: pre-wrap; font-family: inherit;">${summary}</pre>
+    </div>
   `;
 
   try {
@@ -38,21 +39,24 @@ ${summary}
       from: '"דו״ח שיחה" <Report@sbparking.co.il>',
       to: 'Service@sbcloud.co.il',
       subject: `סיכום שיחה עם ${clientName}`,
-      text: mailText,
+      html: htmlContent,
+      headers: {
+        'Content-Type': 'text/html; charset=UTF-8'
+      }
     });
 
-    console.log('Email sent to Service@sbcloud.co.il');
+    console.log('? Email sent to Service@sbcloud.co.il');
     res.status(200).json({ message: 'Email sent successfully' });
   } catch (error) {
-    console.error('Email sending error:', error);
+    console.error('? Email sending error:', error);
     res.status(500).json({ error: 'Failed to send email' });
   }
 });
 
 app.get('/', (req, res) => {
-  res.send('SMTP Email Sender is running');
+  res.send('?? SMTP Email Sender is running');
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`?? Server running on port ${PORT}`);
 });
