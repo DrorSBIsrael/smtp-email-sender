@@ -39,7 +39,7 @@ ${summary}
   try {
     await transporter.sendMail({
       from: 'שיחת צאט <Report@sbparking.co.il>',
-      to: 'Service@sbcloud.co.il', // 2
+      to: 'Dror@sbparking.co.il', // Test
       subject: `סיכום שיחה עם ${clientName}`,
       text: bodyText,
     });
