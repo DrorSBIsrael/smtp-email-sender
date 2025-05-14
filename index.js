@@ -2,6 +2,9 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 app.use(express.json());
 
@@ -19,30 +22,31 @@ const transporter = nodemailer.createTransport({
 });
 
 app.post('/send-summary-email', async (req, res) => {
-  const { to, subject, body } = req.body;
+  const { clientName, phone, summary } = req.body;
 
-  if (!to || !subject || !body) {
-    return res.status(400).json({ error: 'Missing required fields: to, subject, body' });
+  if (!clientName || !summary) {
+    return res.status(400).json({ error: 'Missing required fields: clientName, summary' });
   }
+
+  const bodyText = `
+לקוח: ${clientName}
+טלפון: ${phone || 'לא סופק'}
+
+סיכום שיחה:
+${summary}
+  `;
 
   try {
     await transporter.sendMail({
-      from: '"דו״ח סיכום שיחה" <Report@sbparking.co.il>',
-      to,
-      subject,
-      text: body,
+      from: '"דו״ח שיחה" <Report@sbparking.co.il>',
+      to: 'Service@sbcloud.co.il', // << כתובת יעד קבועה
+      subject: `סיכום שיחה עם ${clientName}`,
+      text: bodyText,
     });
+
     res.status(200).json({ message: 'Email sent successfully' });
   } catch (err) {
     console.error('Error sending email:', err);
     res.status(500).json({ error: 'Failed to send email' });
   }
-});
-
-app.get('/', (req, res) => {
-  res.send('SMTP Email Sender is up and running');
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });
