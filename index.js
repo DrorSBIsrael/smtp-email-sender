@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
     pass: 'o51W38D5',
   },
   tls: {
-    rejectUnauthorized: false, // נדרש לפעמים בחיבורים לא מוצפנים
+    rejectUnauthorized: false, // 1
   }
 });
 
@@ -38,8 +38,8 @@ ${summary}
 
   try {
     await transporter.sendMail({
-      from: '"דו״ח שיחה" <Report@sbparking.co.il>',
-      to: 'Service@sbcloud.co.il', // << כתובת יעד קבועה
+      from: 'שיחת צאט <Report@sbparking.co.il>',
+      to: 'Service@sbcloud.co.il', // 2
       subject: `סיכום שיחה עם ${clientName}`,
       text: bodyText,
     });
