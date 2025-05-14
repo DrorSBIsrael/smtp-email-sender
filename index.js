@@ -5,10 +5,16 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
+// פונקציית קידוד UTF-8 עם Base64 לכותרות
+function encodeHeader(text) {
+  const base64 = Buffer.from(text, 'utf-8').toString('base64');
+  return `=?UTF-8?B?${base64}?=`;
+}
+
 const transporter = nodemailer.createTransport({
   host: 'smtp.012.net.il',
   port: 465,
-  secure: true, // SSL
+  secure: true,
   auth: {
     user: 'Report@sbparking.co.il',
     pass: 'o51W38D5',
@@ -36,17 +42,14 @@ app.post('/send-summary-email', async (req, res) => {
 
   try {
     await transporter.sendMail({
-  from: {
-    name: 'דו״ח שיחה',
-    address: 'Report@sbparking.co.il'
-  },
-  to: 'Service@sbcloud.co.il',
-  subject: `סיכום שיחה עם ${clientName}`,
-  html: htmlContent,
-  headers: {
-    'Content-Type': 'text/html; charset=UTF-8'
-  }
-});
+      from: `${encodeHeader('דו״ח שיחה')} <Report@sbparking.co.il>`,
+      to: 'Service@sbcloud.co.il',
+      subject: encodeHeader(`סיכום שיחה עם ${clientName}`),
+      html: htmlContent,
+      headers: {
+        'Content-Type': 'text/html; charset=UTF-8'
+      }
+    });
 
     console.log('? Email sent to Service@sbcloud.co.il');
     res.status(200).json({ message: 'Email sent successfully' });
