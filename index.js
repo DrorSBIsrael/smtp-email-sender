@@ -36,14 +36,17 @@ app.post('/send-summary-email', async (req, res) => {
 
   try {
     await transporter.sendMail({
-      from: '"דו״ח שיחה" <Report@sbparking.co.il>',
-      to: 'Service@sbcloud.co.il',
-      subject: `סיכום שיחה עם ${clientName}`,
-      html: htmlContent,
-      headers: {
-        'Content-Type': 'text/html; charset=UTF-8'
-      }
-    });
+  from: {
+    name: 'דו״ח שיחה',
+    address: 'Report@sbparking.co.il'
+  },
+  to: 'Service@sbcloud.co.il',
+  subject: `סיכום שיחה עם ${clientName}`,
+  html: htmlContent,
+  headers: {
+    'Content-Type': 'text/html; charset=UTF-8'
+  }
+});
 
     console.log('? Email sent to Service@sbcloud.co.il');
     res.status(200).json({ message: 'Email sent successfully' });
