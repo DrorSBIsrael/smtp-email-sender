@@ -1,0 +1,13 @@
+{
+  "name": "smtp-email-sender",
+  "version": "1.0.0",
+  "description": "Server for sending email through SMTP For GPT Actions",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "nodemailer": "^6.9.8"
+  }
+}
