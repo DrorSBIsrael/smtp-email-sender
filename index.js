@@ -8,7 +8,7 @@ app.use(express.json());
 const transporter = nodemailer.createTransport({
   host: 'smtp.012.net.il',
   port: 465,
-  secure: SSL,
+  secure: true, // ? çåáä ìÎSSL
   auth: {
     user: 'Report@sbparking.co.il',
     pass: 'o51W38D5',
