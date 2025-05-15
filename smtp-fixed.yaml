@@ -1,40 +1,43 @@
 openapi: 3.1.0
 info:
-  title: SMTP Email Sender
-  description: Action לשליחת מייל סיכום שיחה לכתובת קבועה (service@sbcloud.co.il).
-  version: 1.2.0
+  title: שליחת סיכום שיחה
+  version: 1.0.6
+  description: >
+    פעולה זו שולחת סיכום שיחה במייל לכתובות הקבועות:
+    Service@sbcloud.co.il ו־Office@sbcloud.co.il.
+
 servers:
   - url: https://smtp-email-sender.onrender.com
-    description: שרת פרוס ב-Render
+
 paths:
   /send-summary-email:
     post:
       operationId: sendSummaryEmail
-      summary: שליחת מייל סיכום שיחה
-      description: שולח סיכום שיחה עם פרטי לקוח והזמנה לכתובת מייל קבועה (service@sbcloud.co.il).
+      summary: שלח סיכום שיחה
+      description: שולח מייל עם פרטי הלקוח וסיכום השיחה.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - clientName
+                - summary
               properties:
                 clientName:
                   type: string
                   description: שם הלקוח
                 phone:
                   type: string
-                  description: מספר טלפון של הלקוח (אופציונלי)
+                  description: טלפון (לא חובה)
                 summary:
                   type: string
-                  description: סיכום שיחת השירות או ההזמנה
-              required:
-                - clientName
-                - summary
+                  description: סיכום השיחה או ההזמנה
       responses:
         '200':
-          description: המייל נשלח בהצלחה
+          description: Email sent successfully
         '400':
-          description: שגיאה בבקשה
+          description: Missing required fields
         '500':
-          description: שגיאת שרת
+          description: Failed to send email
