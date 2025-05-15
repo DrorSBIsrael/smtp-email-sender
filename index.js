@@ -43,7 +43,7 @@ app.post('/send-summary-email', async (req, res) => {
   try {
     await transporter.sendMail({
       from: `${encodeHeader('דו״ח שיחה')} <Report@sbparking.co.il>`,
-      to: 'Service@sbcloud.co.il',
+      to: ['Service@sbcloud.co.il', 'Office@sbcloud.co.il']
       subject: encodeHeader(`סיכום שיחה עם ${clientName}`),
       html: htmlContent,
       headers: {
