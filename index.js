@@ -1,5 +1,31 @@
+const express = require('express');
+const nodemailer = require('nodemailer');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
+
+// פונקציית קידוד UTF-8 עם Base64 לכותרות
+function encodeHeader(text) {
+  const base64 = Buffer.from(text, 'utf-8').toString('base64');
+  return `=?UTF-8?B?${base64}?=`;
+}
+
+const transporter = nodemailer.createTransport({
+  host: 'smtp.012.net.il',
+  port: 465,
+  secure: true,
+  auth: {
+    user: 'Report@sbparking.co.il',
+    pass: 'o51W38D5',
+  },
+  tls: {
+    rejectUnauthorized: false
+  }
+});
+
 app.post('/send-summary-email', async (req, res) => {
-  const { clientName, phone, summary, type } = req.body;
+  const { clientName, phone, summary } = req.body;
 
   if (!clientName || !summary) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -14,13 +40,8 @@ app.post('/send-summary-email', async (req, res) => {
     </div>
   `;
 
-  // Always send to Service
-  const recipients = ['Service@sbcloud.co.il'];
-
-  // If order or damage — also send to Office
-  if (type === 'order' || type === 'damage') {
-    recipients.push('Office@sbcloud.co.il');
-  }
+  // Always send to both
+  const recipients = ['Service@sbcloud.co.il', 'Office@sbcloud.co.il'];
 
   try {
     await transporter.sendMail({
