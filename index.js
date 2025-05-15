@@ -28,9 +28,9 @@ app.post('/send-summary-email', async (req, res) => {
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
-      <strong>לקוח:</strong> ${clientName}<br/>
-      <strong>טלפון:</strong> ${phone || 'לא סופק'}<br/><br/>
-      <strong>סיכום שיחה:</strong><br/>
+      <strong>clientName:</strong> ${clientName}<br/>
+      <strong>phone:</strong> ${phone || 'לא סופק'}<br/><br/>
+      <strong>Chat Summary:</strong><br/>
       <pre style="white-space: pre-wrap; font-family: inherit;">${summary}</pre>
     </div>
   `;
