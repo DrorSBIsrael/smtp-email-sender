@@ -1,0 +1,39 @@
+  /add-client:
+    post:
+      operationId: addClient
+      summary: הוסף לקוח חדש לקובץ
+      description: שומר לקוח חדש בקובץ JSON לשימוש עתידי
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - שם הלקוח
+                - שם החניון
+                - טלפון
+              properties:
+                שם הלקוח:
+                  type: string
+                שם החניון:
+                  type: string
+                טלפון:
+                  type: string
+                דואר אלקטרוני:
+                  type: string
+                כתובת הלקוח:
+                  type: string
+                קוד קו:
+                  type: string
+                IP:
+                  type: string
+                שם החניון בפריורטי:
+                  type: string
+      responses:
+        '201':
+          description: לקוח נוסף בהצלחה
+        '400':
+          description: שדות חסרים
+        '500':
+          description: שגיאה בשמירה לקובץ

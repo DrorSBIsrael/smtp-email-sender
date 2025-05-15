@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
-  title: ωμιηϊ ριλεν ωιηδ
+  title: Χ©ΧΧ™Χ—Χª Χ΅Χ™Χ›Χ•Χ Χ©Χ™Χ—Χ”
   version: 1.0.6
   description: >
-    τςεμδ ζε ωεμηϊ ριλεν ωιηδ αξιιμ μλϊεαεϊ δχαεςεϊ:
-    Service@sbcloud.co.il εΞOffice@sbcloud.co.il.
+    Χ¤ΧΆΧ•ΧΧ” Χ–Χ• Χ©Χ•ΧΧ—Χª Χ΅Χ™Χ›Χ•Χ Χ©Χ™Χ—Χ” Χ‘ΧΧ™Χ™Χ ΧΧ›ΧªΧ•Χ‘Χ•Χª Χ”Χ§Χ‘Χ•ΧΆΧ•Χª:
+    Service@sbcloud.co.il Χ•ΦΎOffice@sbcloud.co.il.
 
 servers:
   - url: https://smtp-email-sender.onrender.com
@@ -13,8 +13,8 @@ paths:
   /send-summary-email:
     post:
       operationId: sendSummaryEmail
-      summary: ωμη ριλεν ωιηδ
-      description: ωεμη ξιιμ ςν τψθι δμχεη εριλεν δωιηδ.
+      summary: Χ©ΧΧ— Χ΅Χ™Χ›Χ•Χ Χ©Χ™Χ—Χ”
+      description: Χ©Χ•ΧΧ— ΧΧ™Χ™Χ ΧΆΧ Χ¤Χ¨ΧΧ™ Χ”ΧΧ§Χ•Χ— Χ•Χ΅Χ™Χ›Χ•Χ Χ”Χ©Χ™Χ—Χ”.
       requestBody:
         required: true
         content:
@@ -27,13 +27,13 @@ paths:
               properties:
                 clientName:
                   type: string
-                  description: ων δμχεη
+                  description: Χ©Χ Χ”ΧΧ§Χ•Χ—
                 phone:
                   type: string
-                  description: θμτεο (μΰ ηεαδ)
+                  description: ΧΧΧ¤Χ•Χ (ΧΧ Χ—Χ•Χ‘Χ”)
                 summary:
                   type: string
-                  description: ριλεν δωιηδ ΰε δδζξπδ
+                  description: Χ΅Χ™Χ›Χ•Χ Χ”Χ©Χ™Χ—Χ” ΧΧ• Χ”Χ”Χ–ΧΧ Χ”
       responses:
         '200':
           description: Email sent successfully

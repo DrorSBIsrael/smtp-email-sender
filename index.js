@@ -106,10 +106,14 @@ app.post('/identify-client', (req, res) => {
 // הוספת לקוח חדש לקובץ
 app.post('/add-client', (req, res) => {
   const newClient = req.body;
-
-  if (!newClient.clientName || !newClient.parkingName || !newClient.email) {
+  if (
+  !newClient["שם הלקוח"] ||
+  !newClient["שם החניון"] ||
+  !newClient["טלפון"]
+) {
     return res.status(400).json({ error: 'שדות חובה חסרים' });
   }
+
 
   try {
     const clients = JSON.parse(fs.readFileSync(CLIENTS_PATH, 'utf-8'));
