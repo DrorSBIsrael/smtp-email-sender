@@ -1,8 +1,49 @@
+openapi: 3.1.0
+info:
+  title: זיהוי ושליחת סיכום שיחה
+  version: 1.1.0
+  description: >
+    מזהה לקוחות לפי שם, חניון או טלפון מקובץ לקוחות,
+    ושולח סיכום שיחה למשרד במייל.
+
+servers:
+  - url: https://smtp-email-sender.onrender.com
+
+paths:
+  /identify-client:
+    post:
+      operationId: identifyClient
+      summary: זיהוי לקוח מקובץ
+      description: מאתר לקוח לפי שם, חניון או טלפון מקובץ JSON
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clientName:
+                  type: string
+                  description: שם הלקוח
+                parkingName:
+                  type: string
+                  description: שם החניון
+                phone:
+                  type: string
+                  description: טלפון
+      responses:
+        '200':
+          description: לקוח נמצא
+        '404':
+          description: לקוח לא נמצא
+        '500':
+          description: שגיאה בשרת
+
   /add-client:
     post:
       operationId: addClient
-      summary: הוסף לקוח חדש לקובץ
-      description: שומר לקוח חדש בקובץ JSON לשימוש עתידי
+      summary: הוסף לקוח חדש
+      description: שומר לקוח חדש לקובץ לקוחות
       requestBody:
         required: true
         content:
@@ -36,4 +77,38 @@
         '400':
           description: שדות חסרים
         '500':
-          description: שגיאה בשמירה לקובץ
+          description: שגיאה בשמירה
+
+  /send-summary-email:
+    post:
+      operationId: sendSummaryEmail
+      summary: שלח סיכום שיחה
+      description: >
+        שולח מייל ל־Service@sbcloud.co.il ו־Office@sbcloud.co.il
+        עם פרטי הלקוח וסיכום השיחה.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - clientName
+                - summary
+              properties:
+                clientName:
+                  type: string
+                  description: שם הלקוח
+                phone:
+                  type: string
+                  description: טלפון
+                summary:
+                  type: string
+                  description: סיכום השיחה
+      responses:
+        '200':
+          description: המייל נשלח בהצלחה
+        '400':
+          description: שדות חסרים
+        '500':
+          description: שגיאה בשליחה
