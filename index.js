@@ -7,7 +7,7 @@ app.use(express.json());
 
 // פונקציית קידוד UTF-8 עם Base64 לכותרות
 function encodeHeader(text) {
-  const base64 = Buffer.from(text, 'utf-8').toString('base64');
+  const base64 = Buffer.from(text, 'UTF-8').toString('base64');
   return `=?UTF-8?B?${base64}?=`;
 }
 
@@ -43,7 +43,7 @@ app.post('/send-summary-email', async (req, res) => {
   try {
     await transporter.sendMail({
       from: `${encodeHeader('דו״ח שיחה')} <Report@sbparking.co.il>`,
-      to: 'Service@sbcloud.co.il',
+      to: 'Dror@sbparking.co.il',
       subject: encodeHeader(`סיכום שיחה עם ${clientName}`),
       html: htmlContent,
       headers: {
@@ -66,3 +66,4 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`?? Server running on port ${PORT}`);
 });
+
