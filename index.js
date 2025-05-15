@@ -5,13 +5,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// פונקציית קידוד כותרות UTF-8 ל-Base64
-function encodeHeader(text) {
-  const base64 = Buffer.from(text, 'utf-8').toString('base64');
-  return `=?UTF-8?B?${base64}?=`;
-}
-
-// הגדרת SMTP דרך 012 עם SSL בפורט 465
+// SMTP configuration for 012 with SSL
 const transporter = nodemailer.createTransport({
   host: 'smtp.012.net.il',
   port: 465,
@@ -43,18 +37,17 @@ app.post('/send-summary-email', async (req, res) => {
 
   try {
     await transporter.sendMail({
-      from: `${encodeHeader('דו״ח שיחה')} <Report@sbparking.co.il>`,
+      from: '"Chat Summary" <Report@sbparking.co.il>',
       to: 'Service@sbcloud.co.il',
-      subject: encodeHeader(`סיכום שיחה עם ${clientName}`),
+      subject: `Chat Summary for ${clientName}`,
       html: htmlContent,
       headers: {
-        'Content-Type': 'text/html; charset=UTF-8',
-        'Content-Transfer-Encoding': 'quoted-printable'
+        'Content-Type': 'text/html; charset=UTF-8'
       }
     });
 
     console.log('? Email sent to Service@sbcloud.co.il');
-    res.status(200).json({ message: 'Email sent successfully with encoded headers' });
+    res.status(200).json({ message: 'Email sent successfully (English headers)' });
   } catch (error) {
     console.error('? Email sending error:', error);
     res.status(500).json({ error: 'Failed to send email' });
@@ -62,7 +55,7 @@ app.post('/send-summary-email', async (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('?? SMTP Email Sender is running (with encoded headers)');
+  res.send('?? SMTP Email Sender is running (with English headers)');
 });
 
 app.listen(PORT, () => {
