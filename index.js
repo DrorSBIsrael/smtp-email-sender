@@ -2,13 +2,10 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log(`?? Server running on port ${PORT}`);
-});
 
 app.use(express.json());
 
-// הגדרת SMTP עם 012 בפורט 465 (SSL)
+// SMTP הגדרת
 const transporter = nodemailer.createTransport({
   host: 'smtp.012.net.il',
   port: 465,
@@ -18,18 +15,19 @@ const transporter = nodemailer.createTransport({
     pass: 'o51W38D5',
   },
   tls: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+  },
 });
 
 app.post('/send-summary-email', async (req, res) => {
+  console.log('?? Got request from GPT:', req.body);
+
   const { clientName, phone, summary } = req.body;
 
   if (!clientName || !summary) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  // תוכן HTML עם עברית תקינה
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
       <strong>לקוח:</strong> ${clientName}<br/>
@@ -39,7 +37,6 @@ app.post('/send-summary-email', async (req, res) => {
     </div>
   `;
 
-  // תמיד שולח לשני המיילים
   const recipients = ['Service@sbcloud.co.il', 'Office@sbcloud.co.il'];
 
   try {
@@ -49,8 +46,8 @@ app.post('/send-summary-email', async (req, res) => {
       subject: `סיכום שיחה עם ${clientName}`,
       html: htmlContent,
       headers: {
-        'Content-Type': 'text/html; charset=UTF-8'
-      }
+        'Content-Type': 'text/html; charset=UTF-8',
+      },
     });
 
     console.log('? Email sent to:', recipients.join(', '));
