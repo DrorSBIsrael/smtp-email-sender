@@ -1,16 +1,11 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 app.use(express.json());
 
-// פונקציית קידוד UTF-8 עם Base64 לכותרות
-function encodeHeader(text) {
-  const base64 = Buffer.from(text, 'utf-8').toString('base64');
-  return `=?UTF-8?B?${base64}?=`;
-}
-
+// הגדרת SMTP עם 012 בפורט 465 (SSL)
 const transporter = nodemailer.createTransport({
   host: 'smtp.012.net.il',
   port: 465,
@@ -31,23 +26,24 @@ app.post('/send-summary-email', async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  // תוכן HTML עם עברית תקינה
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
-      <strong>Client:</strong> ${clientName}<br/>
-      <strong>Phone:</strong> ${phone || 'Not provided'}<br/><br/>
-      <strong>Conversation Summary:</strong><br/>
+      <strong>לקוח:</strong> ${clientName}<br/>
+      <strong>טלפון:</strong> ${phone || 'לא סופק'}<br/><br/>
+      <strong>סיכום שיחה:</strong><br/>
       <pre style="white-space: pre-wrap; font-family: inherit;">${summary}</pre>
     </div>
   `;
 
-  // Always send to both
+  // תמיד שולח לשני המיילים
   const recipients = ['Service@sbcloud.co.il', 'Office@sbcloud.co.il'];
 
   try {
     await transporter.sendMail({
-      from: '"Chat Summary" <Report@sbparking.co.il>',
+      from: '"דו״ח שיחה" <Report@sbparking.co.il>',
       to: recipients,
-      subject: `Chat Summary for ${clientName}`,
+      subject: `סיכום שיחה עם ${clientName}`,
       html: htmlContent,
       headers: {
         'Content-Type': 'text/html; charset=UTF-8'
@@ -60,4 +56,12 @@ app.post('/send-summary-email', async (req, res) => {
     console.error('? Email sending error:', error);
     res.status(500).json({ error: 'Failed to send email' });
   }
+});
+
+app.get('/', (req, res) => {
+  res.send('?? SMTP Email Sender is running');
+});
+
+app.listen(PORT, () => {
+  console.log(`?? Server running on port ${PORT}`);
 });
