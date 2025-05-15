@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 10000;
 
 app.use(express.json());
 
-// SMTP הגדרת
+// הגדרת SMTP
 const transporter = nodemailer.createTransport({
   host: 'smtp.012.net.il',
   port: 465,
@@ -15,13 +15,12 @@ const transporter = nodemailer.createTransport({
     pass: 'o51W38D5',
   },
   tls: {
-    rejectUnauthorized: false,
-  },
+    rejectUnauthorized: false
+  }
 });
 
+// נקודת קבלת בקשה מה-GPT או מכל מקור אחר
 app.post('/send-summary-email', async (req, res) => {
-  console.log('?? Got request from GPT:', req.body);
-
   const { clientName, phone, summary } = req.body;
 
   if (!clientName || !summary) {
@@ -37,6 +36,7 @@ app.post('/send-summary-email', async (req, res) => {
     </div>
   `;
 
+  // רשימת כתובות קבועה
   const recipients = ['Service@sbcloud.co.il', 'Office@sbcloud.co.il'];
 
   try {
@@ -46,8 +46,8 @@ app.post('/send-summary-email', async (req, res) => {
       subject: `סיכום שיחה עם ${clientName}`,
       html: htmlContent,
       headers: {
-        'Content-Type': 'text/html; charset=UTF-8',
-      },
+        'Content-Type': 'text/html; charset=UTF-8'
+      }
     });
 
     console.log('? Email sent to:', recipients.join(', '));
@@ -58,6 +58,7 @@ app.post('/send-summary-email', async (req, res) => {
   }
 });
 
+// בדיקה מהירה ששרת זמין
 app.get('/', (req, res) => {
   res.send('?? SMTP Email Sender is running');
 });
