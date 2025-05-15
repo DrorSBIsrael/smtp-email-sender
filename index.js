@@ -66,3 +66,53 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`?? Server running on port ${PORT}`);
 });
+
+const fs = require('fs');
+const path = require('path');
+
+const CLIENTS_PATH = path.join(__dirname, 'clients.json');
+
+// זיהוי לקוח לפי שם / חניון / IP
+app.post('/identify-client', (req, res) => {
+  const { clientName, parkingName, ip } = req.body;
+
+  try {
+    const clients = JSON.parse(fs.readFileSync(CLIENTS_PATH, 'utf-8'));
+    const match = clients.find(c =>
+      (clientName && c.clientName.includes(clientName)) ||
+      (parkingName && c.parkingName.includes(parkingName)) ||
+      (ip && c.ip === ip)
+    );
+
+    if (match) {
+      return res.status(200).json({ match });
+    } else {
+      return res.status(404).json({ message: 'לקוח לא נמצא' });
+    }
+  } catch (err) {
+    console.error('שגיאה בזיהוי לקוח:', err);
+    res.status(500).json({ error: 'שגיאה בקריאת קובץ לקוחות' });
+  }
+});
+
+// הוספת לקוח חדש לקובץ
+app.post('/add-client', (req, res) => {
+  const newClient = req.body;
+
+  if (!newClient.clientName || !newClient.parkingName || !newClient.email) {
+    return res.status(400).json({ error: 'שדות חובה חסרים' });
+  }
+
+  try {
+    const clients = JSON.parse(fs.readFileSync(CLIENTS_PATH, 'utf-8'));
+    newClient.id = Date.now(); // מזהה ייחודי
+    clients.push(newClient);
+    fs.writeFileSync(CLIENTS_PATH, JSON.stringify(clients, null, 2), 'utf-8');
+
+    res.status(201).json({ message: 'לקוח נוסף', client: newClient });
+  } catch (err) {
+    console.error('שגיאה בהוספת לקוח:', err);
+    res.status(500).json({ error: 'בעיה בכתיבה לקובץ לקוחות' });
+  }
+});
+
