@@ -77,16 +77,17 @@ const path = require('path');
 
 const CLIENTS_PATH = path.join(__dirname, 'clients.json');
 
-// זיהוי לקוח לפי שם / חניון / IP
+// זיהוי לקוח לפי שם / חניון / טלפון
 app.post('/identify-client', (req, res) => {
-  const { clientName, parkingName, ip } = req.body;
+  const { clientName, parkingName, phone } = req.body;
 
   try {
     const clients = JSON.parse(fs.readFileSync(CLIENTS_PATH, 'utf-8'));
+
     const match = clients.find(c =>
-      (clientName && c.clientName.includes(clientName)) ||
-      (parkingName && c.parkingName.includes(parkingName)) ||
-      (ip && c.ip === ip)
+      (clientName && c["שם הלקוח"] && c["שם הלקוח"].includes(clientName)) ||
+      (parkingName && c["שם החניון"] && c["שם החניון"].includes(parkingName)) ||
+      (phone && c["טלפון"] && c["טלפון"] === phone)
     );
 
     if (match) {
@@ -99,6 +100,8 @@ app.post('/identify-client', (req, res) => {
     res.status(500).json({ error: 'שגיאה בקריאת קובץ לקוחות' });
   }
 });
+
+
 
 // הוספת לקוח חדש לקובץ
 app.post('/add-client', (req, res) => {
