@@ -19,6 +19,11 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
+
 // נקודת קבלת בקשה מה-GPT או מכל מקור אחר
 app.post('/send-summary-email', async (req, res) => {
   const { clientName, phone, summary } = req.body;
