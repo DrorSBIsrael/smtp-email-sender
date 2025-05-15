@@ -1,26 +1,5 @@
-const express = require('express');
-const nodemailer = require('nodemailer');
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(express.json());
-
-// SMTP configuration for 012 with SSL
-const transporter = nodemailer.createTransport({
-  host: 'smtp.012.net.il',
-  port: 465,
-  secure: true,
-  auth: {
-    user: 'Report@sbparking.co.il',
-    pass: 'o51W38D5',
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
-});
-
 app.post('/send-summary-email', async (req, res) => {
-  const { clientName, phone, summary } = req.body;
+  const { clientName, phone, summary, type } = req.body;
 
   if (!clientName || !summary) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -28,17 +7,25 @@ app.post('/send-summary-email', async (req, res) => {
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
-      <strong>clientName:</strong> ${clientName}<br/>
-      <strong>phone:</strong> ${phone || 'לא סופק'}<br/><br/>
-      <strong>Chat Summary:</strong><br/>
+      <strong>Client:</strong> ${clientName}<br/>
+      <strong>Phone:</strong> ${phone || 'Not provided'}<br/><br/>
+      <strong>Conversation Summary:</strong><br/>
       <pre style="white-space: pre-wrap; font-family: inherit;">${summary}</pre>
     </div>
   `;
 
+  // Always send to Service
+  const recipients = ['Service@sbcloud.co.il'];
+
+  // If order or damage — also send to Office
+  if (type === 'order' || type === 'damage') {
+    recipients.push('Office@sbcloud.co.il');
+  }
+
   try {
     await transporter.sendMail({
       from: '"Chat Summary" <Report@sbparking.co.il>',
-      to: 'Service@sbcloud.co.il',
+      to: recipients,
       subject: `Chat Summary for ${clientName}`,
       html: htmlContent,
       headers: {
@@ -46,18 +33,10 @@ app.post('/send-summary-email', async (req, res) => {
       }
     });
 
-    console.log('? Email sent to Service@sbcloud.co.il');
-    res.status(200).json({ message: 'Email sent successfully (English headers)' });
+    console.log('? Email sent to:', recipients.join(', '));
+    res.status(200).json({ message: `Email sent to: ${recipients.join(', ')}` });
   } catch (error) {
     console.error('? Email sending error:', error);
     res.status(500).json({ error: 'Failed to send email' });
   }
-});
-
-app.get('/', (req, res) => {
-  res.send('?? SMTP Email Sender is running (with English headers)');
-});
-
-app.listen(PORT, () => {
-  console.log(`?? Server running on port ${PORT}`);
 });
