@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 10000;
 
 app.use(express.json());
 
-// δβγψϊ SMTP
+// Χ”Χ’Χ“Χ¨Χª SMTP
 const transporter = nodemailer.createTransport({
   host: 'smtp.012.net.il',
   port: 465,
@@ -24,7 +24,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// πχεγϊ χαμϊ αχωδ ξδ-GPT ΰε ξλμ ξχεψ ΰηψ
+// Χ Χ§Χ•Χ“Χª Χ§Χ‘ΧΧª Χ‘Χ§Χ©Χ” ΧΧ”-GPT ΧΧ• ΧΧ›Χ ΧΧ§Χ•Χ¨ ΧΧ—Χ¨
 app.post('/send-summary-email', async (req, res) => {
   const { clientName, phone, summary } = req.body;
 
@@ -34,21 +34,21 @@ app.post('/send-summary-email', async (req, res) => {
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
-      <strong>μχεη:</strong> ${clientName}<br/>
-      <strong>θμτεο:</strong> ${phone || 'μΰ ρετχ'}<br/><br/>
-      <strong>ριλεν ωιηδ:</strong><br/>
+      <strong>ΧΧ§Χ•Χ—:</strong> ${clientName}<br/>
+      <strong>ΧΧΧ¤Χ•Χ:</strong> ${phone || 'ΧΧ Χ΅Χ•Χ¤Χ§'}<br/><br/>
+      <strong>Χ΅Χ™Χ›Χ•Χ Χ©Χ™Χ—Χ”:</strong><br/>
       <pre style="white-space: pre-wrap; font-family: inherit;">${summary}</pre>
     </div>
   `;
 
-  // ψωιξϊ λϊεαεϊ χαεςδ
+  // Χ¨Χ©Χ™ΧΧª Χ›ΧªΧ•Χ‘Χ•Χª Χ§Χ‘Χ•ΧΆΧ”
   const recipients = ['Service@sbcloud.co.il', 'Office@sbcloud.co.il'];
 
   try {
     await transporter.sendMail({
-      from: '"γεΨη ωιηδ" <Report@sbparking.co.il>',
+      from: '"Χ“Χ•Χ΄Χ— Χ©Χ™Χ—Χ”" <Report@sbparking.co.il>',
       to: recipients,
-      subject: `ριλεν ωιηδ ςν ${clientName}`,
+      subject: `Χ΅Χ™Χ›Χ•Χ Χ©Χ™Χ—Χ” ΧΆΧ ${clientName}`,
       html: htmlContent,
       headers: {
         'Content-Type': 'text/html; charset=UTF-8'
@@ -63,7 +63,7 @@ app.post('/send-summary-email', async (req, res) => {
   }
 });
 
-// αγιχδ ξδιψδ ωωψϊ ζξιο
+// Χ‘Χ“Χ™Χ§Χ” ΧΧ”Χ™Χ¨Χ” Χ©Χ©Χ¨Χª Χ–ΧΧ™Χ
 app.get('/', (req, res) => {
   res.send('?? SMTP Email Sender is running');
 });
@@ -77,7 +77,7 @@ const path = require('path');
 
 const CLIENTS_PATH = path.join(__dirname, 'clients.json');
 
-// ζιδει μχεη μτι ων / ηπιεο / IP
+// Χ–Χ™Χ”Χ•Χ™ ΧΧ§Χ•Χ— ΧΧ¤Χ™ Χ©Χ / Χ—Χ Χ™Χ•Χ / IP
 app.post('/identify-client', (req, res) => {
   const { clientName, parkingName, ip } = req.body;
 
@@ -92,32 +92,32 @@ app.post('/identify-client', (req, res) => {
     if (match) {
       return res.status(200).json({ match });
     } else {
-      return res.status(404).json({ message: 'μχεη μΰ πξφΰ' });
+      return res.status(404).json({ message: 'ΧΧ§Χ•Χ— ΧΧ Χ ΧΧ¦Χ' });
     }
   } catch (err) {
-    console.error('ωβιΰδ αζιδει μχεη:', err);
-    res.status(500).json({ error: 'ωβιΰδ αχψιΰϊ χεαυ μχεηεϊ' });
+    console.error('Χ©Χ’Χ™ΧΧ” Χ‘Χ–Χ™Χ”Χ•Χ™ ΧΧ§Χ•Χ—:', err);
+    res.status(500).json({ error: 'Χ©Χ’Χ™ΧΧ” Χ‘Χ§Χ¨Χ™ΧΧª Χ§Χ•Χ‘Χ¥ ΧΧ§Χ•Χ—Χ•Χª' });
   }
 });
 
-// δερτϊ μχεη ηγω μχεαυ
+// Χ”Χ•Χ΅Χ¤Χª ΧΧ§Χ•Χ— Χ—Χ“Χ© ΧΧ§Χ•Χ‘Χ¥
 app.post('/add-client', (req, res) => {
   const newClient = req.body;
 
   if (!newClient.clientName || !newClient.parkingName || !newClient.email) {
-    return res.status(400).json({ error: 'ωγεϊ ηεαδ ηρψιν' });
+    return res.status(400).json({ error: 'Χ©Χ“Χ•Χª Χ—Χ•Χ‘Χ” Χ—Χ΅Χ¨Χ™Χ' });
   }
 
   try {
     const clients = JSON.parse(fs.readFileSync(CLIENTS_PATH, 'utf-8'));
-    newClient.id = Date.now(); // ξζδδ ιιηεγι
+    newClient.id = Date.now(); // ΧΧ–Χ”Χ” Χ™Χ™Χ—Χ•Χ“Χ™
     clients.push(newClient);
     fs.writeFileSync(CLIENTS_PATH, JSON.stringify(clients, null, 2), 'utf-8');
 
-    res.status(201).json({ message: 'μχεη περσ', client: newClient });
+    res.status(201).json({ message: 'ΧΧ§Χ•Χ— Χ Χ•Χ΅Χ£', client: newClient });
   } catch (err) {
-    console.error('ωβιΰδ αδερτϊ μχεη:', err);
-    res.status(500).json({ error: 'αςιδ αλϊιαδ μχεαυ μχεηεϊ' });
+    console.error('Χ©Χ’Χ™ΧΧ” Χ‘Χ”Χ•Χ΅Χ¤Χª ΧΧ§Χ•Χ—:', err);
+    res.status(500).json({ error: 'Χ‘ΧΆΧ™Χ” Χ‘Χ›ΧªΧ™Χ‘Χ” ΧΧ§Χ•Χ‘Χ¥ ΧΧ§Χ•Χ—Χ•Χª' });
   }
 });
 
