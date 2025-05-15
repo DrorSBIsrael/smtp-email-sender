@@ -34,35 +34,30 @@ app.post('/send-summary-email', async (req, res) => {
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
       <strong>Client:</strong> ${clientName}<br/>
-      <strong>Phone:</strong> ${phone || 'לא סופק'}<br/><br/>
+      <strong>Phone:</strong> ${phone || 'Not provided'}<br/><br/>
       <strong>Conversation Summary:</strong><br/>
       <pre style="white-space: pre-wrap; font-family: inherit;">${summary}</pre>
     </div>
   `;
 
+  // Always send to both
+  const recipients = ['Service@sbcloud.co.il', 'Office@sbcloud.co.il'];
+
   try {
     await transporter.sendMail({
-      from: `${encodeHeader('דו״ח שיחה')} <Report@sbparking.co.il>`,
-      to: ['Service@sbcloud.co.il', 'Office@sbcloud.co.il']
-      subject: encodeHeader(`סיכום שיחה עם ${clientName}`),
+      from: '"Chat Summary" <Report@sbparking.co.il>',
+      to: recipients,
+      subject: `Chat Summary for ${clientName}`,
       html: htmlContent,
       headers: {
         'Content-Type': 'text/html; charset=UTF-8'
       }
     });
 
-    console.log('? Email sent to Service@sbcloud.co.il');
-    res.status(200).json({ message: 'Email sent successfully' });
+    console.log('? Email sent to:', recipients.join(', '));
+    res.status(200).json({ message: `Email sent to: ${recipients.join(', ')}` });
   } catch (error) {
     console.error('? Email sending error:', error);
     res.status(500).json({ error: 'Failed to send email' });
   }
-});
-
-app.get('/', (req, res) => {
-  res.send('?? SMTP Email Sender is running');
-});
-
-app.listen(PORT, () => {
-  console.log(`?? Server running on port ${PORT}`);
 });
