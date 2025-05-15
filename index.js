@@ -2,6 +2,17 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 10000;
+const path = require('path');
+
+app.get('/download-clients', (req, res) => {
+  const filePath = path.join(__dirname, 'clients.json');
+  res.download(filePath, 'clients.json', err => {
+    if (err) {
+      console.error('❌ שגיאה בהורדת קובץ:', err);
+      res.status(500).send('שגיאה בהורדת הקובץ');
+    }
+  });
+});
 
 app.use(express.json());
 

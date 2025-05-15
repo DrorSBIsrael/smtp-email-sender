@@ -38,7 +38,16 @@ paths:
           description: לקוח לא נמצא
         '500':
           description: שגיאה בשרת
-
+  /download-clients:
+    get:
+      operationId: downloadClients
+      summary: הורד את קובץ הלקוחות
+      description: מוריד את הקובץ clients.json עם כל הלקוחות
+      responses:
+        '200':
+          description: קובץ הורד בהצלחה
+        '500':
+          description: שגיאה בהורדה
   /add-client:
     post:
       operationId: addClient
