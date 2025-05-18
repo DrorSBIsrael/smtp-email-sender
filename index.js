@@ -1,22 +1,21 @@
+
 const express = require('express');
 const nodemailer = require('nodemailer');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 10000;
-const path = require('path');
 
-app.get('/download-clients', (req, res) => {
-  const filePath = path.join(__dirname, 'clients.json');
-  res.download(filePath, 'clients.json', err => {
-    if (err) {
-      console.error('❌ שגיאה בהורדת קובץ:', err);
-      res.status(500).send('שגיאה בהורדת הקובץ');
-    }
-  });
-});
+const upload = multer({ dest: 'uploads/' });
 
 app.use(express.json());
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
 
-// הגדרת SMTP
+// SMTP configuration
 const transporter = nodemailer.createTransport({
   host: 'smtp.012.net.il',
   port: 465,
@@ -30,14 +29,10 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-app.use((req, res, next) => {
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  next();
-});
-
-// נקודת קבלת בקשה מה-GPT או מכל מקור אחר
-app.post('/send-summary-email', async (req, res) => {
+// send email with optional attachment
+app.post('/send-summary-email', upload.single('attachment'), async (req, res) => {
   const { clientName, phone, summary } = req.body;
+  const file = req.file;
 
   if (!clientName || !summary) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -52,90 +47,40 @@ app.post('/send-summary-email', async (req, res) => {
     </div>
   `;
 
-  // רשימת כתובות קבועה
   const recipients = ['Service@sbcloud.co.il', 'Office@sbcloud.co.il'];
 
-  try {
-    await transporter.sendMail({
-      from: '"דו״ח שיחה" <Report@sbparking.co.il>',
-      to: recipients,
-      subject: `סיכום שיחה עם ${clientName}`,
-      html: htmlContent,
-      headers: {
-        'Content-Type': 'text/html; charset=UTF-8'
-      }
-    });
+  const mailOptions = {
+    from: '"דו״ח שיחה" <Report@sbparking.co.il>',
+    to: recipients,
+    subject: `סיכום שיחה עם ${clientName}`,
+    html: htmlContent,
+    headers: {
+      'Content-Type': 'text/html; charset=UTF-8'
+    }
+  };
 
-    console.log('? Email sent to:', recipients.join(', '));
+  if (file) {
+    mailOptions.attachments = [{
+      filename: file.originalname,
+      path: file.path
+    }];
+  }
+
+  try {
+    await transporter.sendMail(mailOptions);
+    if (file) fs.unlinkSync(file.path); // clean up uploaded file
     res.status(200).json({ message: `Email sent to: ${recipients.join(', ')}` });
   } catch (error) {
-    console.error('? Email sending error:', error);
+    console.error('❌ Email sending error:', error);
     res.status(500).json({ error: 'Failed to send email' });
   }
 });
 
-// בדיקה מהירה ששרת זמין
+// health check
 app.get('/', (req, res) => {
-  res.send('?? SMTP Email Sender is running');
+  res.send('📡 SMTP Email Sender is running');
 });
 
 app.listen(PORT, () => {
-  console.log(`?? Server running on port ${PORT}`);
+  console.log(`📡 Server running on port ${PORT}`);
 });
-
-const fs = require('fs');
-const path = require('path');
-
-const CLIENTS_PATH = path.join(__dirname, 'clients.json');
-
-// זיהוי לקוח לפי שם / חניון / טלפון
-app.post('/identify-client', (req, res) => {
-  const { clientName, parkingName, phone } = req.body;
-
-  try {
-    const clients = JSON.parse(fs.readFileSync(CLIENTS_PATH, 'utf-8'));
-
-    const match = clients.find(c =>
-      (clientName && c["שם הלקוח"] && c["שם הלקוח"].includes(clientName)) ||
-      (parkingName && c["שם החניון"] && c["שם החניון"].includes(parkingName)) ||
-      (phone && c["טלפון"] && c["טלפון"] === phone)
-    );
-
-    if (match) {
-      return res.status(200).json({ match });
-    } else {
-      return res.status(404).json({ message: 'לקוח לא נמצא' });
-    }
-  } catch (err) {
-    console.error('שגיאה בזיהוי לקוח:', err);
-    res.status(500).json({ error: 'שגיאה בקריאת קובץ לקוחות' });
-  }
-});
-
-
-
-// הוספת לקוח חדש לקובץ
-app.post('/add-client', (req, res) => {
-  const newClient = req.body;
-  if (
-  !newClient["שם הלקוח"] ||
-  !newClient["שם החניון"] ||
-  !newClient["טלפון"]
-) {
-    return res.status(400).json({ error: 'שדות חובה חסרים' });
-  }
-
-
-  try {
-    const clients = JSON.parse(fs.readFileSync(CLIENTS_PATH, 'utf-8'));
-    newClient.id = Date.now(); // מזהה ייחודי
-    clients.push(newClient);
-    fs.writeFileSync(CLIENTS_PATH, JSON.stringify(clients, null, 2), 'utf-8');
-
-    res.status(201).json({ message: 'לקוח נוסף', client: newClient });
-  } catch (err) {
-    console.error('שגיאה בהוספת לקוח:', err);
-    res.status(500).json({ error: 'בעיה בכתיבה לקובץ לקוחות' });
-  }
-});
-

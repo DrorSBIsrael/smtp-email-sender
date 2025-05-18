@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
   title: זיהוי ושליחת סיכום שיחה
-  version: 1.1.0
+  version: 1.2.1
   description: >
-    מזהה לקוחות לפי שם, חניון או טלפון מקובץ לקוחות,
-    ושולח סיכום שיחה למשרד במייל.
+    מזהה לקוחות לפי שם, חניון או טלפון מקובץ לקוחות (clients.json),
+    ושולח סיכום שיחה במייל כולל קובץ מצורף (אם יש).
 
 servers:
   - url: https://smtp-email-sender.onrender.com
@@ -14,7 +14,7 @@ paths:
     post:
       operationId: identifyClient
       summary: זיהוי לקוח מקובץ
-      description: מאתר לקוח לפי שם, חניון או טלפון מקובץ JSON
+      description: מאתר לקוח לפי שם, חניון או טלפון מתוך קובץ JSON
       requestBody:
         required: true
         content:
@@ -37,22 +37,24 @@ paths:
         '404':
           description: לקוח לא נמצא
         '500':
-          description: שגיאה בשרת
+          description: שגיאת שרת
+
   /download-clients:
     get:
       operationId: downloadClients
-      summary: הורד את קובץ הלקוחות
-      description: מוריד את הקובץ clients.json עם כל הלקוחות
+      summary: הורדת קובץ לקוחות
+      description: מחזיר את קובץ clients.json המלא
       responses:
         '200':
-          description: קובץ הורד בהצלחה
+          description: קובץ הלקוחות הורד בהצלחה
         '500':
           description: שגיאה בהורדה
+
   /add-client:
     post:
       operationId: addClient
-      summary: הוסף לקוח חדש
-      description: שומר לקוח חדש לקובץ לקוחות
+      summary: הוספת לקוח חדש
+      description: מוסיף לקוח לקובץ הלקוחות
       requestBody:
         required: true
         content:
@@ -91,18 +93,19 @@ paths:
   /send-summary-email:
     post:
       operationId: sendSummaryEmail
-      summary: שלח סיכום שיחה
+      summary: שליחת סיכום שיחה
       description: >
-        שולח מייל ל־Service@sbcloud.co.il ו־Office@sbcloud.co.il
-        עם פרטי הלקוח וסיכום השיחה.
+        שולח מייל עם פרטי לקוח, סיכום שיחה וקובץ מצורף (אם צורף)
+        לכתובות service@sbcloud.co.il ו־office@sbcloud.co.il.
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               required:
                 - clientName
+                - phone
                 - summary
               properties:
                 clientName:
@@ -114,6 +117,10 @@ paths:
                 summary:
                   type: string
                   description: סיכום השיחה
+                attachment:
+                  type: string
+                  format: binary
+                  description: קובץ מצורף (תמונה או מסמך, אופציונלי)
       responses:
         '200':
           description: המייל נשלח בהצלחה
