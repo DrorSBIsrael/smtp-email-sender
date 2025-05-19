@@ -1,13 +1,13 @@
-// index.js (גרסה מלאה כולל תמיכה בקובץ ולוגים)
+
 const express = require('express');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// 📁 יצירת תיקיית uploads אם לא קיימת
 const uploadPath = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath);
@@ -21,7 +21,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// 📤 הגדרת SMTP
 const transporter = nodemailer.createTransport({
   host: 'smtp.012.net.il',
   port: 465,
@@ -35,20 +34,21 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// 📤 שליחת מייל עם או בלי קובץ מצורף
 app.post('/send-summary-email', upload.single('attachment'), async (req, res) => {
-  let clientName, phone, summary, file;
+  let clientName, phone, summary, file, attachmentUrl;
 
   if (req.is('multipart/form-data')) {
     clientName = req.body.clientName;
     phone = req.body.phone;
     summary = req.body.summary;
+    attachmentUrl = req.body.attachmentUrl;
     file = req.file;
-    if (!file) console.warn('⚠️ קובץ לא התקבל בשרת (req.file ריק)');
-    else console.log('📎 קובץ מצורף:', file.originalname);
+    if (file) console.log('📎 קובץ התקבל (upload):', file.originalname);
+    else console.warn('⚠️ קובץ לא התקבל דרך upload');
   } else {
-    ({ clientName, phone, summary } = req.body);
+    ({ clientName, phone, summary, attachmentUrl } = req.body);
     file = null;
+    console.log('📨 JSON רגיל התקבל (ללא קובץ ישיר)');
   }
 
   if (!clientName || !summary) {
@@ -65,7 +65,6 @@ app.post('/send-summary-email', upload.single('attachment'), async (req, res) =>
   `;
 
   const recipients = ['Service@sbcloud.co.il', 'Office@sbcloud.co.il'];
-
   const mailOptions = {
     from: 'Report@sbparking.co.il',
     to: recipients,
@@ -76,17 +75,34 @@ app.post('/send-summary-email', upload.single('attachment'), async (req, res) =>
     }
   };
 
+  let tempDownloadPath = null;
   if (file) {
-    mailOptions.attachments = [{
-      filename: file.originalname,
-      path: file.path
-    }];
+    mailOptions.attachments = [{ filename: file.originalname, path: file.path }];
+  } else if (attachmentUrl) {
+    try {
+      const fileName = `downloaded-${Date.now()}.jpg`;
+      tempDownloadPath = path.join(__dirname, 'uploads', fileName);
+      const response = await axios({ method: 'get', url: attachmentUrl, responseType: 'stream' });
+      const writer = fs.createWriteStream(tempDownloadPath);
+      response.data.pipe(writer);
+      await new Promise((resolve, reject) => {
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+      });
+      console.log('⬇️ קובץ ירד מ־URL:', attachmentUrl);
+      mailOptions.attachments = [{ filename: fileName, path: tempDownloadPath }];
+    } catch (err) {
+      console.warn('⚠️ שגיאה בהורדת קובץ מה־attachmentUrl:', err.message);
+    }
+  } else {
+    console.log('ℹ️ לא התקבל קובץ כלל (לא דרך upload ולא דרך URL)');
   }
 
   try {
     await transporter.sendMail(mailOptions);
-    if (file) fs.unlinkSync(file.path); // 🧹 ניקוי קובץ זמני
-    console.log(`✅ מייל נשלח ל־${recipients.join(', ')}`);
+    if (file) fs.unlinkSync(file.path);
+    if (tempDownloadPath && fs.existsSync(tempDownloadPath)) fs.unlinkSync(tempDownloadPath);
+    console.log(`✅ מייל נשלח אל: ${recipients.join(', ')}`);
     res.status(200).json({ message: `Email sent to: ${recipients.join(', ')}` });
   } catch (error) {
     console.error('❌ שגיאה בשליחת המייל:', error);
@@ -94,12 +110,10 @@ app.post('/send-summary-email', upload.single('attachment'), async (req, res) =>
   }
 });
 
-// 🔍 בדיקת חיים
 app.get('/', (req, res) => {
   res.send('📡 SMTP Email Sender is running');
 });
 
-// 🚀 הפעלת השרת
 app.listen(PORT, () => {
   console.log(`📡 Server running on port ${PORT}`);
 });
