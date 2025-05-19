@@ -43,6 +43,7 @@ app.post('/send-summary-email', upload.single('attachment'), async (req, res) =>
     phone = req.body.phone;
     summary = req.body.summary;
     file = req.file;
+console.log('📎 קובץ מצורף:', file);
   } else {
     ({ clientName, phone, summary } = req.body);
     file = null;
