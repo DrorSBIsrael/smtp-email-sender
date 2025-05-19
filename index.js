@@ -1,3 +1,4 @@
+// index.js (גרסה מלאה כולל תמיכה בקובץ ולוגים)
 const express = require('express');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
@@ -6,25 +7,21 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// יצירת תיקיית uploads אם לא קיימת
+// 📁 יצירת תיקיית uploads אם לא קיימת
 const uploadPath = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath);
 }
 const upload = multer({ dest: 'uploads/' });
 
-app.use((req, res, next) => {
-  console.log('📥 בקשה נכנסת:', req.method, req.path);
-  next();
-});
-
 app.use(express.json());
 app.use((req, res, next) => {
+  console.log(`📥 בקשה נכנסת: ${req.method} ${req.url}`);
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   next();
 });
 
-// SMTP configuration
+// 📤 הגדרת SMTP
 const transporter = nodemailer.createTransport({
   host: 'smtp.012.net.il',
   port: 465,
@@ -38,7 +35,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// handle both multipart/form-data and application/json
+// 📤 שליחת מייל עם או בלי קובץ מצורף
 app.post('/send-summary-email', upload.single('attachment'), async (req, res) => {
   let clientName, phone, summary, file;
 
@@ -47,8 +44,8 @@ app.post('/send-summary-email', upload.single('attachment'), async (req, res) =>
     phone = req.body.phone;
     summary = req.body.summary;
     file = req.file;
-if (!file) console.warn('⚠️ קובץ לא התקבל בשרת (req.file ריק)');
-console.log('📎 קובץ מצורף:', file);
+    if (!file) console.warn('⚠️ קובץ לא התקבל בשרת (req.file ריק)');
+    else console.log('📎 קובץ מצורף:', file.originalname);
   } else {
     ({ clientName, phone, summary } = req.body);
     file = null;
@@ -70,7 +67,7 @@ console.log('📎 קובץ מצורף:', file);
   const recipients = ['Service@sbcloud.co.il', 'Office@sbcloud.co.il'];
 
   const mailOptions = {
-    from: '"דו״ח שיחה" <Report@sbparking.co.il>',
+    from: 'Report@sbparking.co.il',
     to: recipients,
     subject: `סיכום שיחה עם ${clientName}`,
     html: htmlContent,
@@ -88,19 +85,21 @@ console.log('📎 קובץ מצורף:', file);
 
   try {
     await transporter.sendMail(mailOptions);
-    if (file) fs.unlinkSync(file.path); // clean up uploaded file
+    if (file) fs.unlinkSync(file.path); // 🧹 ניקוי קובץ זמני
+    console.log(`✅ מייל נשלח ל־${recipients.join(', ')}`);
     res.status(200).json({ message: `Email sent to: ${recipients.join(', ')}` });
   } catch (error) {
-    console.error('❌ Email sending error:', error);
+    console.error('❌ שגיאה בשליחת המייל:', error);
     res.status(500).json({ error: 'Failed to send email' });
   }
 });
 
-// health check
+// 🔍 בדיקת חיים
 app.get('/', (req, res) => {
   res.send('📡 SMTP Email Sender is running');
 });
 
+// 🚀 הפעלת השרת
 app.listen(PORT, () => {
   console.log(`📡 Server running on port ${PORT}`);
 });
