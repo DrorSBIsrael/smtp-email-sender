@@ -1,14 +1,18 @@
 {
   "name": "smtp-email-sender",
   "version": "1.0.0",
-  "description": "שרת לשליחת מייל סיכום שיחה עם או בלי קובץ מצורף",
+  "description": "שירות Node.js לשליחת סיכום שיחה עם או בלי קובץ מצורף",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "axios": "^1.6.7",
+    "express": "^4.18.4",
     "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.9.3"
+    "nodemailer": "^6.9.13"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
