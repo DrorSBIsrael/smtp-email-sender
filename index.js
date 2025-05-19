@@ -29,7 +29,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// send email with optional attachment (supports both json and multipart)
+// handle both multipart/form-data and application/json
 app.post('/send-summary-email', upload.single('attachment'), async (req, res) => {
   let clientName, phone, summary, file;
 
