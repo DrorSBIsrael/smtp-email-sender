@@ -1,102 +1,21 @@
+
 openapi: 3.1.0
 info:
-  title: זיהוי ושליחת סיכום שיחה
-  version: 1.2.1
+  title: שליחת סיכום שיחה
+  version: 1.2.0
   description: >
-    מזהה לקוחות לפי שם, חניון או טלפון מקובץ לקוחות (clients.json),
-    ושולח סיכום שיחה במייל כולל קובץ מצורף (אם יש).
+    שולח מייל עם סיכום שיחה + קובץ מצורף (אם קיים) לכתובת service@sbcloud.co.il ו־office@sbcloud.co.il.
 
 servers:
   - url: https://smtp-email-sender.onrender.com
 
 paths:
-  /identify-client:
-    post:
-      operationId: identifyClient
-      summary: זיהוי לקוח מקובץ
-      description: מאתר לקוח לפי שם, חניון או טלפון מתוך קובץ JSON
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                clientName:
-                  type: string
-                  description: שם הלקוח
-                parkingName:
-                  type: string
-                  description: שם החניון
-                phone:
-                  type: string
-                  description: טלפון
-      responses:
-        '200':
-          description: לקוח נמצא
-        '404':
-          description: לקוח לא נמצא
-        '500':
-          description: שגיאת שרת
-
-  /download-clients:
-    get:
-      operationId: downloadClients
-      summary: הורדת קובץ לקוחות
-      description: מחזיר את קובץ clients.json המלא
-      responses:
-        '200':
-          description: קובץ הלקוחות הורד בהצלחה
-        '500':
-          description: שגיאה בהורדה
-
-  /add-client:
-    post:
-      operationId: addClient
-      summary: הוספת לקוח חדש
-      description: מוסיף לקוח לקובץ הלקוחות
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - שם הלקוח
-                - שם החניון
-                - טלפון
-              properties:
-                שם הלקוח:
-                  type: string
-                שם החניון:
-                  type: string
-                טלפון:
-                  type: string
-                דואר אלקטרוני:
-                  type: string
-                כתובת הלקוח:
-                  type: string
-                קוד קו:
-                  type: string
-                IP:
-                  type: string
-                שם החניון בפריורטי:
-                  type: string
-      responses:
-        '201':
-          description: לקוח נוסף בהצלחה
-        '400':
-          description: שדות חסרים
-        '500':
-          description: שגיאה בשמירה
-
   /send-summary-email:
     post:
       operationId: sendSummaryEmail
-      summary: שליחת סיכום שיחה
+      summary: שלח סיכום שיחה
       description: >
-        שולח מייל עם פרטי לקוח, סיכום שיחה וקובץ מצורף (אם צורף)
-        לכתובות service@sbcloud.co.il ו־office@sbcloud.co.il.
+        שולח מייל עם פרטי לקוח, סיכום שיחה, וקובץ מצורף (אם נדרש).
       requestBody:
         required: true
         content:
@@ -105,7 +24,6 @@ paths:
               type: object
               required:
                 - clientName
-                - phone
                 - summary
               properties:
                 clientName:
@@ -120,7 +38,7 @@ paths:
                 attachment:
                   type: string
                   format: binary
-                  description: קובץ מצורף (תמונה או מסמך, אופציונלי)
+                  description: קובץ מצורף (אופציונלי – תמונה או מסמך)
       responses:
         '200':
           description: המייל נשלח בהצלחה

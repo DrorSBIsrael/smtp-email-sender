@@ -29,10 +29,19 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// send email with optional attachment
+// send email with optional attachment (supports both json and multipart)
 app.post('/send-summary-email', upload.single('attachment'), async (req, res) => {
-  const { clientName, phone, summary } = req.body;
-  const file = req.file;
+  let clientName, phone, summary, file;
+
+  if (req.is('multipart/form-data')) {
+    clientName = req.body.clientName;
+    phone = req.body.phone;
+    summary = req.body.summary;
+    file = req.file;
+  } else {
+    ({ clientName, phone, summary } = req.body);
+    file = null;
+  }
 
   if (!clientName || !summary) {
     return res.status(400).json({ error: 'Missing required fields' });
