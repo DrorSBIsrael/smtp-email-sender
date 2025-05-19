@@ -1,8 +1,3 @@
-app.use((req, res, next) => {
-  console.log('📥 בקשה נכנסת:', req.method, req.path);
-  next();
-});
-
 const express = require('express');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
@@ -17,6 +12,11 @@ if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath);
 }
 const upload = multer({ dest: 'uploads/' });
+
+app.use((req, res, next) => {
+  console.log('📥 בקשה נכנסת:', req.method, req.path);
+  next();
+});
 
 app.use(express.json());
 app.use((req, res, next) => {
