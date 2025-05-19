@@ -1,3 +1,7 @@
+app.use((req, res, next) => {
+  console.log('📥 בקשה נכנסת:', req.method, req.path);
+  next();
+});
 
 const express = require('express');
 const nodemailer = require('nodemailer');
