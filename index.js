@@ -7,6 +7,11 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// יצירת תיקיית uploads אם לא קיימת
+const uploadPath = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath);
+}
 const upload = multer({ dest: 'uploads/' });
 
 app.use(express.json());
